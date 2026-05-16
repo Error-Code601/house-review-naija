@@ -8,13 +8,13 @@ function ReviewForm({ addReview }) {
   const [area, setArea] = useState("");
   const [houseNumber, setHouseNumber] = useState("");
   const [streetName, setStreetName] = useState("");
-  const [rent, setRent] = useState(""); // Text state to allow formatting commas
-  const [fees, setFees] = useState(""); // Text state to allow formatting commas
+  const [rent, setRent] = useState("");
+  const [fees, setFees] = useState("");
   const [comment, setComment] = useState("");
   const [agentName, setAgentName] = useState("");
   const [agentPhone, setAgentPhone] = useState("");
 
-  // Metrics & Badges States
+  // Metrics States
   const [commuteTime, setCommuteTime] = useState("15-30 mins");
   const [ispStrength, setIspStrength] = useState("Excellent (5G/Fiber)");
   const [noiseLevel, setNoiseLevel] = useState("Quiet & Serene");
@@ -24,16 +24,14 @@ function ReviewForm({ addReview }) {
   const [uploadedReceipt, setUploadedReceipt] = useState(false);
   const [uploadedPhoto, setUploadedPhoto] = useState(false);
 
-  // HELPER ALGORITHM: Formats raw typing numbers to include commas
+  // ALGORITHM: Forces numeric grouping string commas inside value streams
   const formatWithCommas = (value) => {
     if (!value) return "";
-    // Strip out non-numeric characters
     const cleanNumber = value.replace(/[^0-9]/g, "");
-    // Insert thousands separator commas
     return cleanNumber.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  // HELPER ALGORITHM: Strips out commas to retrieve pure number for math operations
+  // ALGORITHM: Strips out string formatting grouping delimiters for pure backend math
   const cleanNumericValue = (str) => {
     if (!str) return 0;
     return Number(str.replace(/,/g, ""));
@@ -45,15 +43,11 @@ function ReviewForm({ addReview }) {
       houseNumber ? houseNumber + ", " : ""
     }${streetName} (${area})`;
 
-    // Convert text configurations back into calculation numbers
-    const finalRentNum = cleanNumericValue(rent);
-    const finalFeesNum = cleanNumericValue(fees);
-
     addReview({
       id: Date.now(),
       address: fullAddress,
       city,
-      total: finalRentNum + finalFeesNum,
+      total: cleanNumericValue(rent) + cleanNumericValue(fees),
       comment,
       agent: {
         name: agentName || "Unknown Agent",
@@ -99,13 +93,12 @@ function ReviewForm({ addReview }) {
         <span className="font-extrabold text-amber-700 uppercase block mb-1">
           ⚠️ Legal Integrity Notice:
         </span>
-        NaijaHouseCheck is built on consumer absolute truth. If a landlord or
-        management files a dispute and validates a review as malicious,
-        misleading, or completely false, **the post will be deleted
-        permanently** to protect data sanitation parameters.
+        NaijaHouseCheck is built on consumer absolute truth. Defamatory or
+        completely fake reviews will be deleted permanently once audited by
+        property owners.
       </div>
 
-      {/* Progress Wizard */}
+      {/* Progress Bar Wizard Tracker */}
       <div className="flex justify-between items-center mb-10 relative px-2">
         {stepsList.map((st, idx) => (
           <React.Fragment key={st.num}>
@@ -145,9 +138,6 @@ function ReviewForm({ addReview }) {
       {currentStep === 1 && (
         <div className="space-y-4">
           <h3 className="text-xl font-black text-gray-900">House Location</h3>
-          <p className="text-xs text-gray-400">
-            Enter the location coordinates of the property you're auditing.
-          </p>
           <div>
             <label className="block text-xs font-bold text-gray-600 mb-1">
               State *
@@ -207,7 +197,7 @@ function ReviewForm({ addReview }) {
         </div>
       )}
 
-      {/* STEP 2: REVIEW DETAILS WITH COMMA INPUTS */}
+      {/* STEP 2: REVIEW DETAILS WITH FORCED REALTIME TEXT COMMA FORMATTING */}
       {currentStep === 2 && (
         <div className="space-y-4">
           <h3 className="text-xl font-black text-gray-900">
@@ -225,13 +215,15 @@ function ReviewForm({ addReview }) {
                 </span>
                 <input
                   type="text"
-                  placeholder="2,500,000"
-                  className="w-full p-3 pl-7 border rounded-xl text-sm font-bold text-gray-800"
+                  inputMode="numeric"
+                  placeholder="3,000,000"
+                  className="w-full p-3 pl-7 border rounded-xl text-sm font-bold text-gray-800 outline-none focus:ring-2 focus:ring-emerald-500"
                   value={rent}
                   onChange={(e) => setRent(formatWithCommas(e.target.value))}
                 />
               </div>
             </div>
+
             <div className="w-1/2">
               <label className="block text-xs font-bold text-gray-600 mb-1">
                 Other Extra Fees (₦)
@@ -242,8 +234,9 @@ function ReviewForm({ addReview }) {
                 </span>
                 <input
                   type="text"
+                  inputMode="numeric"
                   placeholder="450,000"
-                  className="w-full p-3 pl-7 border rounded-xl text-sm font-bold text-gray-800"
+                  className="w-full p-3 pl-7 border rounded-xl text-sm font-bold text-gray-800 outline-none focus:ring-2 focus:ring-emerald-500"
                   value={fees}
                   onChange={(e) => setFees(formatWithCommas(e.target.value))}
                 />
@@ -251,10 +244,9 @@ function ReviewForm({ addReview }) {
             </div>
           </div>
 
-          {/* Realtime Live Calculations Box */}
           <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100 flex justify-between items-center">
             <span className="text-xs text-emerald-800 font-bold">
-              Calculated Package Cost:
+              Calculated Move-In Total:
             </span>
             <span className="text-sm font-black text-emerald-700">
               ₦
@@ -372,9 +364,6 @@ function ReviewForm({ addReview }) {
           <h3 className="text-xl font-black text-gray-900 text-left">
             Photo Evidence
           </h3>
-          <p className="text-xs text-gray-400 text-left">
-            Upload real pictures of the room conditions or compound.
-          </p>
           <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 bg-gray-50">
             <p className="text-sm text-gray-500 mb-4">
               Drag and drop apartment photos here
@@ -419,10 +408,6 @@ function ReviewForm({ addReview }) {
           <h3 className="text-xl font-black text-gray-900">
             Proof of Residence
           </h3>
-          <p className="text-xs text-gray-400">
-            Attach a blurred picture of your electricity bill or tenancy log
-            header.
-          </p>
           <div className="border border-purple-100 bg-purple-50/50 rounded-2xl p-5 flex justify-between items-center">
             <div className="text-xs text-purple-950 max-w-sm">
               <span className="font-bold">Anonymized Protection Shield:</span>{" "}
@@ -516,10 +501,6 @@ function ReviewForm({ addReview }) {
                 : "Standard Review Drop"}
             </div>
           </div>
-          <p className="text-xs text-gray-400">
-            By hitting publish, you attest that this log statement maps to
-            absolute property parameters.
-          </p>
           <div className="flex gap-3 pt-4">
             <button
               type="button"

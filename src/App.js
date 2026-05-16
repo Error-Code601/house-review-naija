@@ -12,8 +12,6 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeLandlordId, setActiveLandlordId] = useState(null);
   const [rebuttalText, setRebuttalText] = useState("");
-
-  // Security State: Track if the landlord has simulated an official document upload
   const [landlordVerifiedDoc, setLandlordVerifiedDoc] = useState(false);
 
   useEffect(() => {
@@ -41,31 +39,26 @@ function App() {
     );
   };
 
-  // SECURE LANDLORD REPLY SYSTEM
   const submitLandlordReply = (id) => {
-    if (!rebuttalText.trim())
-      return alert("Abeg, type your clarification note first!");
+    if (!rebuttalText.trim()) return alert("Enter reply text!");
     if (!landlordVerifiedDoc)
       return alert(
-        "Security Block: You must attach a proof of ownership document (C of O, Tax slip, or Allocation Letter) to verify your claim!"
+        "Security Block: Attach an ownership verification token document first!"
       );
 
     setReviews(
       reviews.map((rev) => {
-        if (rev.id === id) {
+        if (rev.id === id)
           return {
             ...rev,
-            // Save the text, but mark it as pending your manual backend review
             landlordReply: rebuttalText,
             isLandlordVerified: true,
           };
-        }
         return rev;
       })
     );
-
     alert(
-      "Verification Request Submitted! 🛡️\n\nYour document token has been locked for validation. Your official upgrade statement will appear on the feed with a 'Verified Owner' mark once our compliance team cross-checks your attached proof."
+      "Verification Request Submitted! Vetting will complete within 24 hours."
     );
     setRebuttalText("");
     setLandlordVerifiedDoc(false);
@@ -114,11 +107,12 @@ function App() {
     return matchesCity && matchesSearch;
   });
 
-  // LANDING VIEW ENGINE
+  // ========================================================
+  // VIEW 1: TECH LANDING PAGE UTILITY
+  // ========================================================
   if (view === "landing") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-950 via-slate-900 to-black text-white flex flex-col justify-between">
-        {/* Top Header Navbar */}
         <nav className="flex justify-between items-center max-w-6xl mx-auto w-full px-6 py-6 border-b border-white/5">
           <h2 className="text-2xl font-black italic tracking-wider text-blue-400">
             NaijaHouseCheck 🇳🇬
@@ -131,7 +125,6 @@ function App() {
           </button>
         </nav>
 
-        {/* Hero Area */}
         <main className="max-w-6xl mx-auto text-center space-y-6 px-6 pt-16 pb-12 w-full">
           <div className="inline-block bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs px-4 py-1.5 rounded-full font-black tracking-widest uppercase">
             Consumer Transparency for Nigerian Renters
@@ -154,7 +147,7 @@ function App() {
             </button>
           </div>
 
-          {/* Features Grid */}
+          {/* Core Features Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-12 text-left">
             <div className="bg-white/5 p-5 rounded-2xl border border-white/10 hover:border-blue-500/30 transition duration-300">
               <h3 className="font-bold text-blue-400 text-sm uppercase tracking-wide">
@@ -194,7 +187,7 @@ function App() {
             </div>
           </div>
 
-          {/* Public Audit Database Section */}
+          {/* Landing Database Terminal */}
           <div className="pt-20 text-left max-w-2xl mx-auto space-y-6">
             <div className="text-center sm:text-left bg-gradient-to-r from-blue-900/20 to-transparent p-4 rounded-xl border border-blue-500/10">
               <h2 className="text-2xl sm:text-3xl font-black text-white">
@@ -207,16 +200,14 @@ function App() {
               </p>
             </div>
 
-            {/* Instant Search Bar */}
             <input
               type="text"
-              placeholder="🔍 Search street, keyword, or broker phone (e.g., 'Allen Avenue')..."
+              placeholder="🔍 Search street, area, compound name, or broker (e.g., 'Allen Avenue')..."
               className="w-full p-4 rounded-2xl border border-white/10 bg-white/5 text-white placeholder-slate-500 font-medium outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
 
-            {/* City Filters */}
             <div className="flex gap-1 bg-white/5 p-1 rounded-2xl border border-white/10">
               {["All", "Lagos", "Abuja", "Ibadan"].map((city) => (
                 <button
@@ -233,14 +224,12 @@ function App() {
               ))}
             </div>
 
-            {/* Render Public Review Cards */}
             <div className="space-y-4">
               {filteredReviews.length === 0 && (
                 <p className="text-slate-500 text-center py-10 italic bg-white/5 rounded-2xl border border-white/10 text-sm">
                   No matching reviews loaded yet.
                 </p>
               )}
-
               {filteredReviews.map((rev) => {
                 const agentStatus = checkAgentStatus(rev.agent?.phone);
                 return (
@@ -285,10 +274,9 @@ function App() {
                       "{rev.comment}"
                     </p>
 
-                    {/* Landlord Response Display Box */}
                     {rev.landlordReply && (
                       <div className="bg-purple-500/10 border border-purple-500/30 p-3 rounded-xl text-xs">
-                        <p className="font-black text-purple-400 uppercase tracking-wider text-[10px] flex items-center gap-1">
+                        <p className="font-black text-purple-400 uppercase tracking-wider text-[10px]">
                           🛡️ Verified Property Owner Upgrade Response:
                         </p>
                         <p className="text-slate-200 font-medium mt-0.5">
@@ -297,23 +285,21 @@ function App() {
                       </div>
                     )}
 
-                    {/* ACTIONS ROW */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pt-2 border-t border-white/5 text-xs">
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleAttest(rev.id, "valid")}
-                          className="bg-white/5 text-slate-300 border border-white/5 px-3 py-1.5 rounded-xl text-xs transition"
+                          className="bg-white/5 text-slate-300 border border-white/5 px-3 py-1.5 rounded-xl text-xs"
                         >
-                          👍 This is Real ({rev.validCount || 0})
+                          👍 Real ({rev.validCount || 0})
                         </button>
                         <button
                           onClick={() => handleAttest(rev.id, "false")}
-                          className="bg-white/5 text-slate-300 border border-white/5 px-3 py-1.5 rounded-xl text-xs transition"
+                          className="bg-white/5 text-slate-300 border border-white/5 px-3 py-1.5 rounded-xl text-xs"
                         >
-                          👎 This is Fake ({rev.falseCount || 0})
+                          👎 Fake ({rev.falseCount || 0})
                         </button>
                       </div>
-
                       <div className="flex gap-3 w-full sm:w-auto justify-end">
                         <button
                           onClick={() => handleTakedownNotice(rev.id)}
@@ -334,7 +320,6 @@ function App() {
                       </div>
                     </div>
 
-                    {/* SECURE PUBLIC INLINE REBUTTAL DRAWER */}
                     {activeLandlordId === rev.id && (
                       <div className="mt-2 bg-slate-900 p-4 rounded-xl border border-white/10 space-y-3">
                         <div className="bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-lg text-[11px] text-amber-300">
@@ -342,21 +327,19 @@ function App() {
                           <span className="font-bold">
                             Identity Verification Protocol:
                           </span>{" "}
-                          To block fraudulent claims, you must attach a proof of
-                          ownership document (e.g., Land slip, Tenancy ledger
-                          authority token, or C of O).
+                          Attach proof of ownership (e.g., Land tax slip,
+                          Allocation ledger or C of O) to block fraud.
                         </div>
-
                         <div className="flex justify-between items-center bg-white/5 p-2 rounded-lg border border-white/5">
                           <span className="text-xs text-slate-400">
-                            Attach proof file (.pdf, .png, .jpg)
+                            Attach verification file (.pdf, .png, .jpg)
                           </span>
                           <button
                             type="button"
                             onClick={() => {
                               setLandlordVerifiedDoc(true);
                               alert(
-                                "Owner authorization document uploaded successfully! 📁"
+                                "Authorization document token cached successfully! 📁"
                               );
                             }}
                             className={`px-3 py-1 rounded text-xs font-bold transition ${
@@ -370,14 +353,12 @@ function App() {
                               : "Upload Proof"}
                           </button>
                         </div>
-
                         <textarea
                           value={rebuttalText}
                           onChange={(e) => setRebuttalText(e.target.value)}
                           placeholder="Type official clarification or logged upgrade features..."
                           className="w-full p-2 border border-white/10 text-xs rounded-lg outline-none bg-slate-950 text-white h-16"
                         />
-
                         <div className="flex justify-end gap-1.5 text-[11px]">
                           <button
                             onClick={() => {
@@ -404,7 +385,7 @@ function App() {
           </div>
         </main>
 
-        {/* Corporate Footer */}
+        {/* Industrial Footer System */}
         <footer className="bg-black/40 border-t border-white/5 w-full text-left text-sm text-slate-400 pt-12 pb-6 px-6">
           <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-4 gap-8 mb-6">
             <div>
@@ -412,15 +393,15 @@ function App() {
                 NaijaHouseCheck
               </h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Independent platform for monitoring rental parameters and broker
-                operations across active real estate hubs.
+                Independent public utility portal for tracking structural
+                parameters and broker indices across major Nigerian cities.
               </p>
             </div>
             <div>
               <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-2">
                 Explore
               </h4>
-              <ul className="space-y-1 text-xs">
+              <ul className="space-y-1.5 text-xs">
                 {["Addresses", "Agents Registry", "Tenant Reviews"].map((l) => (
                   <li
                     key={l}
@@ -435,7 +416,7 @@ function App() {
               <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-2">
                 Insights
               </h4>
-              <ul className="space-y-1 text-xs">
+              <ul className="space-y-1.5 text-xs">
                 {["Data Blog", "Rental Guides", "City Flood Rankings"].map(
                   (l) => (
                     <li
@@ -452,7 +433,7 @@ function App() {
               <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-2">
                 Legal
               </h4>
-              <ul className="space-y-1 text-xs">
+              <ul className="space-y-1.5 text-xs">
                 {["Privacy Policy", "Terms of Use", "Arbitration Notice"].map(
                   (l) => (
                     <li
@@ -474,7 +455,9 @@ function App() {
     );
   }
 
-  // CORE APPLICATION PLATFORM VIEW (WIZARD DASHBOARD)
+  // ========================================================
+  // VIEW 2: PREMIUM REPLICA APP CONTAINER & NAVBAR
+  // ========================================================
   return (
     <div className="min-h-screen bg-slate-50 pb-16">
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 px-6 py-4 mb-8 shadow-sm">
@@ -483,8 +466,8 @@ function App() {
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => setView("landing")}
           >
-            <h1 className="text-xl font-black tracking-tight text-slate-900">
-              🏠 NaijaHouseCheck
+            <h1 className="text-xl font-black tracking-tight text-slate-900 flex items-center gap-1">
+              <span className="text-emerald-500">🏠</span> NaijaHouseCheck
             </h1>
           </div>
           <div className="flex items-center gap-6 text-sm font-semibold text-gray-600">
