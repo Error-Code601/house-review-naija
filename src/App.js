@@ -1,11 +1,85 @@
 import React, { useState, useEffect } from "react";
 import ReviewForm from "./ReviewForm";
 
+// ========================================================
+// HIGHEST QUALITY PRE-LOADED NIGERIAN REAL ESTATE DATA SEEDS
+// ========================================================
+const PRE_LOADED_FEED = [
+  {
+    id: 1,
+    address: "Block B, Flat 4, Agungi Estate (Agungi)",
+    city: "Lagos",
+    total: 3400000,
+    comment:
+      "The compound is nice and neat, but abeg make sure you ask about the pumping machine situation before paying. If NEPA takes light for more than two days, water stops running completely. Also, the street floods for at least 3 hours whenever there is heavy rain.",
+    agent: { name: "Agent Sunday", phone: "08032145566", isScam: false },
+    metrics: {
+      commuteTime: "30-60 mins",
+      ispStrength: "Excellent (5G/Fiber)",
+      noiseLevel: "Moderate (Commercial edge)",
+    },
+    badges: { hasLight: true, floods: true },
+    isVerifiedResident: true,
+    validCount: 14,
+    falseCount: 1,
+    landlordReply:
+      "We have updated our internal power backup matrix. A brand new central automated generator was linked in March 2026 to keep the central water pumps running even during grid blackouts.",
+  },
+  {
+    id: 2,
+    address: "14 Gana Street (Maitama)",
+    city: "Abuja",
+    total: 8500000,
+    comment:
+      "Top notch security and serenity. Perfect location for remote work, MTN Fiber network speed is consistently pushing past 150Mbps here. No landlord drama whatsoever, but the service charge increments can be quite unpredictable.",
+    agent: {
+      name: "Maitama Luxury Homes",
+      phone: "08123456789",
+      isScam: false,
+    },
+    metrics: {
+      commuteTime: "0-15 mins (Near Hub)",
+      ispStrength: "Excellent (5G/Fiber/Starlink)",
+      noiseLevel: "Quiet & Serene",
+    },
+    badges: { hasLight: true, floods: false },
+    isVerifiedResident: true,
+    validCount: 28,
+    falseCount: 0,
+    landlordReply: null,
+  },
+  {
+    id: 3,
+    address: "Plot 8, Akala Express (Bodija Area)",
+    city: "Ibadan",
+    total: 1200000,
+    comment:
+      "Very quiet neighborhood, perfect if you are avoiding the Lagos chaos. Airtel 4G and Glo are solid. However, the caretaker here likes to form king—he will lock the central estate gate by exactly 11:00 PM, and if you are outside, you are sleeping out.",
+    agent: { name: "Alhaji Caretaker", phone: "07055511223", isScam: true },
+    metrics: {
+      commuteTime: "15-30 mins",
+      ispStrength: "Average (Stable 4G)",
+      noiseLevel: "Quiet & Serene",
+    },
+    badges: { hasLight: false, floods: false },
+    isVerifiedResident: false,
+    validCount: 9,
+    falseCount: 2,
+    landlordReply: null,
+  },
+];
+
 function App() {
   const [view, setView] = useState("landing");
+
+  // ALGORITHM: Fallback to pre-loaded seeds if browser local storage memory is clean
   const [reviews, setReviews] = useState(() => {
     const saved = localStorage.getItem("naija_reviews");
-    return saved ? JSON.parse(saved) : [];
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return parsed.length > 0 ? parsed : PRE_LOADED_FEED;
+    }
+    return PRE_LOADED_FEED;
   });
 
   const [filterCity, setFilterCity] = useState("All");
@@ -19,7 +93,9 @@ function App() {
   }, [reviews]);
 
   const addReview = (newReview) => {
+    // Inserts newly submitted user records cleanly at the very top of the feed loop
     setReviews([newReview, ...reviews]);
+    setView("landing"); // Auto-returns user back to landing page to see their live post
   };
 
   const handleAttest = (id, type) => {
@@ -42,9 +118,7 @@ function App() {
   const submitLandlordReply = (id) => {
     if (!rebuttalText.trim()) return alert("Enter reply text!");
     if (!landlordVerifiedDoc)
-      return alert(
-        "Security Block: Attach an ownership verification token document first!"
-      );
+      return alert("Security Block: Attach verification token document first!");
 
     setReviews(
       reviews.map((rev) => {
@@ -108,11 +182,12 @@ function App() {
   });
 
   // ========================================================
-  // VIEW 1: TECH LANDING PAGE UTILITY
+  // VIEW 1: LANDING PAGE RENDERING CONTROLLER
   // ========================================================
   if (view === "landing") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-950 via-slate-900 to-black text-white flex flex-col justify-between">
+        {/* Top Header Navbar */}
         <nav className="flex justify-between items-center max-w-6xl mx-auto w-full px-6 py-6 border-b border-white/5">
           <h2 className="text-2xl font-black italic tracking-wider text-blue-400">
             NaijaHouseCheck 🇳🇬
@@ -125,6 +200,7 @@ function App() {
           </button>
         </nav>
 
+        {/* Hero Area */}
         <main className="max-w-6xl mx-auto text-center space-y-6 px-6 pt-16 pb-12 w-full">
           <div className="inline-block bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs px-4 py-1.5 rounded-full font-black tracking-widest uppercase">
             Consumer Transparency for Nigerian Renters
@@ -147,7 +223,7 @@ function App() {
             </button>
           </div>
 
-          {/* Core Features Grid */}
+          {/* Features Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-12 text-left">
             <div className="bg-white/5 p-5 rounded-2xl border border-white/10 hover:border-blue-500/30 transition duration-300">
               <h3 className="font-bold text-blue-400 text-sm uppercase tracking-wide">
@@ -187,7 +263,7 @@ function App() {
             </div>
           </div>
 
-          {/* Landing Database Terminal */}
+          {/* Public Audit Database Section */}
           <div className="pt-20 text-left max-w-2xl mx-auto space-y-6">
             <div className="text-center sm:text-left bg-gradient-to-r from-blue-900/20 to-transparent p-4 rounded-xl border border-blue-500/10">
               <h2 className="text-2xl sm:text-3xl font-black text-white">
@@ -200,14 +276,16 @@ function App() {
               </p>
             </div>
 
+            {/* Instant Search Bar */}
             <input
               type="text"
-              placeholder="🔍 Search street, area, compound name, or broker (e.g., 'Allen Avenue')..."
+              placeholder="🔍 Search street, area, compound name, or broker (e.g., 'Akala Express')..."
               className="w-full p-4 rounded-2xl border border-white/10 bg-white/5 text-white placeholder-slate-500 font-medium outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
 
+            {/* City Filters */}
             <div className="flex gap-1 bg-white/5 p-1 rounded-2xl border border-white/10">
               {["All", "Lagos", "Abuja", "Ibadan"].map((city) => (
                 <button
@@ -215,8 +293,8 @@ function App() {
                   onClick={() => setFilterCity(city)}
                   className={`w-1/4 py-2 text-xs font-black rounded-xl transition ${
                     filterCity === city
-                      ? "bg-blue-600 text-white"
-                      : "text-slate-400"
+                      ? "bg-blue-600 text-white shadow-md"
+                      : "text-slate-400 hover:text-white"
                   }`}
                 >
                   {city}
@@ -224,6 +302,7 @@ function App() {
               ))}
             </div>
 
+            {/* Render Public Review Cards */}
             <div className="space-y-4">
               {filteredReviews.length === 0 && (
                 <p className="text-slate-500 text-center py-10 italic bg-white/5 rounded-2xl border border-white/10 text-sm">
@@ -269,6 +348,21 @@ function App() {
                         🔊 <span>Acoustics:</span> {rev.metrics?.noiseLevel}
                       </div>
                     </div>
+
+                    {rev.agent && (
+                      <div className="p-2.5 bg-purple-500/5 rounded-xl border border-purple-500/10 flex justify-between items-center text-[11px]">
+                        <p className="text-slate-400">
+                          Linked Broker:{" "}
+                          <span className="text-slate-200 font-bold">
+                            {rev.agent.name}
+                          </span>{" "}
+                          ({rev.agent.phone})
+                        </p>
+                        <span className={`text-[10px] ${agentStatus.color}`}>
+                          {agentStatus.status}
+                        </span>
+                      </div>
+                    )}
 
                     <p className="text-slate-300 text-sm leading-relaxed italic">
                       "{rev.comment}"
@@ -385,7 +479,7 @@ function App() {
           </div>
         </main>
 
-        {/* Industrial Footer System */}
+        {/* Corporate Footer */}
         <footer className="bg-black/40 border-t border-white/5 w-full text-left text-sm text-slate-400 pt-12 pb-6 px-6">
           <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-4 gap-8 mb-6">
             <div>
@@ -456,7 +550,7 @@ function App() {
   }
 
   // ========================================================
-  // VIEW 2: PREMIUM REPLICA APP CONTAINER & NAVBAR
+  // VIEW 2: FORM WIZARD VIEW PANEL
   // ========================================================
   return (
     <div className="min-h-screen bg-slate-50 pb-16">
@@ -481,7 +575,7 @@ function App() {
               className="hover:text-emerald-500 cursor-pointer text-xs bg-gray-50 border p-2 rounded-xl transition"
               onClick={() => setView("landing")}
             >
-              ← Return Home
+              | Cancel & Return
             </span>
           </div>
         </div>
